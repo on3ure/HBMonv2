@@ -655,7 +655,7 @@ def process_message(_bmessage):
                 log_message = '{} {} {}   SYS: {:8.8s} SRC: {:9.9s}; {:9.9s} TS: {} TGID: {:7.7s} {:17.17s} SUB: {:9.9s}; {:18.18s} Time: {}s '.format(_now[10:19], p[0][6:], p[1], p[3], p[5], alias_call(int(p[5]), subscriber_ids), p[7],p[8],alias_tgid(int(p[8]),talkgroup_ids), p[6], alias_short(int(p[6]), subscriber_ids), int(float(p[9])))
                 # log only to file if system is NOT OpenBridge event (not logging open bridge system, name depends on your OB definitions) AND transmit time is LONGER as 2sec (make sense for very short transmits)
                 if LASTHEARD_INC:
-                   if int(float(p[9]))> 2: 
+                   if int(float(p[9]))> 1: 
                       log_lh_message = '{},{},{},{},{},{},{},TS{},TG{},{},{},{}'.format(_now, p[9], p[0], p[1], p[3], p[5], alias_call(int(p[5]), subscriber_ids), p[7], p[8],alias_tgid(int(p[8]),talkgroup_ids),p[6], alias_short(int(p[6]), subscriber_ids))
                       lh_logfile = open(LOG_PATH+"lastheard.log", "a")
                       lh_logfile.write(log_lh_message + '\n')
@@ -667,9 +667,9 @@ def process_message(_bmessage):
                       f.write("<br><fieldset style=\"border-radius: 8px; background-color:#f0f0f0f0;margin-left:15px;margin-right:15px;font-size:14px;border-top-left-radius: 10px; border-top-right-radius: 10px;border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;\">\n")
                       f.write("<legend><b><font color=\"#000\">&nbsp;.: Lastheard :.&nbsp;</font></b></legend>\n")
                       f.write("<table style=\"width:100%; font: 10pt arial, sans-serif\">\n")
-                      f.write("<TR style=\" height: 32px;font: 10pt arial, sans-serif;"+THEME_COLOR+"\"><TH>Date</TH><TH>Time</TH><TH>Callsign (DMR-Id)</TH><TH>Name</TH><TH>TG#</TH><TH>TG Name</TH><TH>TX (s)</TH><TH>Slot</TH><TH>Source ID</TH><TH>System</TH></TR>\n")
+                      f.write("<TR style=\" height: 32px;font: 10pt arial, sans-serif;"+THEME_COLOR+"\"><TH>Date</TH><TH>Time (UTC)</TH><TH>Callsign (DMR-Id)</TH><TH>Name</TH><TH>TG#</TH><TH>TG Name</TH><TH>TX (s)</TH><TH>Slot</TH><TH>Source ID</TH><TH>System</TH></TR>\n")
                       with open(LOG_PATH+"lastheard.log", "r") as textfile:
-                          for row in islice(reversed(list(csv.reader(textfile))),200):
+                          for row in islice(reversed(list(csv.reader(textfile))),400):
                             duration=row[1]
                             dur=str(int(float(duration.strip())))
                             if row[10] not in my_list:
@@ -839,7 +839,8 @@ class web_server(Resource):
     def render_GET(self, request):
         global BRIDGES_INC, URL_PATH
         logging.info('static website requested: %s', request)
-        if WEB_AUTH and (request.uri == b'/masters' or request.uri == b'/peers' or request.uri == b'/opb' or request.uri == b'/moni' or request.uri == b'/bridges' or request.uri == b'/sinfo'):
+        #if WEB_AUTH and (request.uri == b'/masters' or request.uri == b'/peers' or request.uri == b'/opb' or request.uri == b'/moni' or request.uri == b'/bridges' or request.uri == b'/sinfo'):
+        if WEB_AUTH and (request.uri == b'/masters' or request.uri == b'/moni'):
           user = WEB_USER.encode('utf-8')
           password = WEB_PASS.encode('utf-8')
           auth = request.getHeader('Authorization')
@@ -859,14 +860,6 @@ class web_server(Resource):
                     BRIDGES_INC = False
                     URL_PATH = "masters"
                     return (masters_html).encode('utf-8')
-                 elif request.uri == b'/peers':
-                    BRIDGES_INC = False
-                    URL_PATH = "peers"
-                    return (peers_html).encode('utf-8')
-                 elif request.uri == b'/opb':
-                    BRIDGES_INC = False
-                    URL_PATH = "opb"
-                    return (opb_html).encode('utf-8')
                  elif request.uri == b'/moni':
                     BRIDGES_INC = False
                     URL_PATH = "moni"
@@ -875,10 +868,6 @@ class web_server(Resource):
                     BRIDGES_INC = False
                     URL_PATH = "info"
                     return (info_html).encode('utf-8')
-                 elif request.uri == b'/sinfo':
-                    BRIDGES_INC = False
-                    URL_PATH = "sinfo"
-                    return (sysinfo_html).encode('utf-8')
                  else:
                     return  "Bad request".encode('utf-8')
           request.setResponseCode(401)
@@ -903,14 +892,6 @@ class web_server(Resource):
                 BRIDGES_INC = False
                 URL_PATH = "masters"
                 return (masters_html).encode('utf-8')
-            elif request.uri == b'/peers':
-                BRIDGES_INC = False
-                URL_PATH = "peers"
-                return (peers_html).encode('utf-8')
-            elif request.uri == b'/opb':
-                BRIDGES_INC = False
-                URL_PATH = "opb"
-                return (opb_html).encode('utf-8')
             elif request.uri == b'/moni':
                 BRIDGES_INC = False
                 URL_PATH = "moni"
@@ -919,10 +900,6 @@ class web_server(Resource):
                 BRIDGES_INC = False
                 URL_PATH = "info"
                 return (info_html).encode('utf-8')
-            elif request.uri == b'/sinfo':
-                BRIDGES_INC = False
-                URL_PATH = "sinfo"
-                return (sysinfo_html).encode('utf-8')
             else:
                 return  "Bad request".encode('utf-8')
 
