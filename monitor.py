@@ -686,7 +686,7 @@ def process_message(_bmessage):
                                    my_list.append(row[10])
                                    n += 1
                                f.write(hline+"\n")
-                            if n == 15:
+                            if n == 150:
                                break
                       f.write("</table></fieldset><br>")
                       f.close()
